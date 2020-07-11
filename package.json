@@ -29,7 +29,7 @@
     "rsql-builder": "^1.1.0",
     "rxjs": "~6.5.4",
     "stream": "0.0.2",
-    "tinymce": "4.5.7",
+    "tinymce": "4.9.10",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
   },
