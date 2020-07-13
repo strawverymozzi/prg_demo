@@ -1,0 +1,29 @@
+<dx-data-grid 
+#masterGrid 
+[dataSource]="dataSource" 
+id="masterGrid"
+height="400px"
+[showBorders]="true" 
+[focusedRowEnabled]="true"
+keyExpr="uid" 
+(onRowDblClick)="emitEvent($event,'RowDblClick')"
+(onExporting)="onExporting($event)">
+
+  <dxo-selection mode="single"></dxo-selection>
+  
+  <dxo-export 
+  [enabled]="true" 
+  [allowExportSelectedData]="true"></dxo-export>
+
+  <ng-container *ngFor="let col of config; i as index">
+    <dxi-column 
+    [caption]="col.caption" 
+    [dataField]="col.dataField" 
+    [width]="col.width" 
+    [fixed]="col.fixed"
+    alignment="center"
+    >
+    </dxi-column>
+  </ng-container>
+
+</dx-data-grid>

@@ -1,0 +1,57 @@
+<!-- header update form end -->
+<dx-data-grid 
+#detailGrid 
+id="detailGrid" 
+keyExpr="CODEA" 
+height="350px"
+[dataSource]="dataSource" 
+[showBorders]="true"
+[focusedRowEnabled]="true" 
+(onEditorPreparing)="onEditorPreparing($event)"
+(onEditorPrepared)="onEditorPrepared($event)"
+(onEditingStart)="onEditingStart($event)"
+(onInitNewRow)="emitEvent($event,'InitNewRow')"
+(onRowInserting)="emitEvent($event,'RowInserting')"
+(onRowInserted)="emitEvent($event,'RowInserted')"
+(onRowUpdating)="emitEvent($event,'RowUpdating')"
+(onRowUpdated)="emitEvent($event,'RowUpdated')"
+(onRowRemoving)="emitEvent($event,'RowRemoving')"
+(onRowRemoved)="emitEvent($event,'RowRemoved')">
+
+  <!-- (onKeyDown)="onDetailDropKeyDown($event)" -->
+  <dxo-editing 
+    mode="batch"
+    [allowUpdating]="true"
+    [allowDeleting]="true"
+    [allowAdding]="true">
+    </dxo-editing>
+
+  <!-- <dxo-selection mode="single"></dxo-selection> -->
+  <dxo-selection
+    selectAllMode="allPages"
+    showCheckBoxesMode="onClick"
+    mode="multiple">
+  </dxo-selection>
+
+  <dxo-keyboard-navigation></dxo-keyboard-navigation>
+
+ <dxi-column 
+  *ngFor="let col of config; i as index"
+  [caption]="col.caption"
+  [allowEditing]="col.allowEditing"
+  [editCellTemplate]="col.editCellTemplate" 
+  [dataField]="col.dataField"
+  [width]="col.width"
+  [fixed]="col.fixed"
+  alignment="center">
+  </dxi-column>
+
+  <div *dxTemplate="let cellInfo of 'search'">
+    <dx-text-box 
+    [value]="cellInfo.value"
+    (onValueChanged)="cellInfo.setValue($event.value)">
+      <dxi-button name="skuBtn" [options]="inlineCellBtn">
+      </dxi-button>
+    </dx-text-box>
+  </div>
+</dx-data-grid>

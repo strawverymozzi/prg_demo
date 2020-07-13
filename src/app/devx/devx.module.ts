@@ -1,0 +1,65 @@
+import { NgModule, ModuleWithProviders } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+import {
+  DxFormModule,
+  DxDataGridModule,
+  DxToolbarModule,
+  DxAccordionModule,
+  DxTabPanelModule,
+  DxActionSheetModule,
+  DxPopupModule,
+  DxScrollViewModule,
+  DxDropDownBoxModule,
+  DxListModule,
+  DxDateBoxModule,
+  DxTextBoxModule,
+  DxButtonModule,
+  DxCheckBoxModule,
+  DxSelectBoxModule,
+  DxTemplateModule,
+  DxTagBoxModule,
+  DxBulletModule
+} from 'devextreme-angular';
+
+const MODULE = [
+  CommonModule,
+  DxTextBoxModule,
+  DxButtonModule,
+  DxDataGridModule,
+  DxToolbarModule,
+  DxAccordionModule,
+  DxTabPanelModule,
+  DxActionSheetModule,
+  DxPopupModule,
+  DxScrollViewModule,
+  DxDropDownBoxModule,
+  DxCheckBoxModule,
+  DxSelectBoxModule,
+  DxFormModule,
+  DxDateBoxModule,
+  DxTemplateModule,
+  DxTagBoxModule,
+  DxListModule,
+  DxBulletModule,
+];
+
+
+@NgModule({
+  declarations: [],
+  imports: [
+
+  ],
+  exports: [
+    ...MODULE
+  ]
+})
+export class DevxModule {
+  static forRoot(): ModuleWithProviders {
+    return {
+      ngModule: DevxModule,
+      providers: []
+    }
+  }
+
+}
