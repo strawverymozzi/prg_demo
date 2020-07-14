@@ -8,7 +8,7 @@
 // prod
 export const environment = {
   production: false,
-  apiUrl: 'https://aqueous-sierra-56466.herokuapp.com',
+  apiUrl: 'https://aqueous-sierra-56466.herokuapp.com/api/v1',
   defaultLang: window.navigator.language,
 };
 
