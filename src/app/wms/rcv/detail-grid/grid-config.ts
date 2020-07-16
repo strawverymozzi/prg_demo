@@ -1,4 +1,5 @@
 export const DETAILGRIDCOLCONFIG = [
+    { caption: 'uid', dataField: "uid", width: 200, fixed: true, visible: true },
     { caption: 'detailname1', editCellTemplate: '', dataField: "CODEA", width: 200, fixed: true, visible: true, allowEditing: false },
     { caption: 'detailname2', editCellTemplate: 'search', dataField: "CODEB", width: 200, fixed: true, visible: true, allowEditing: true },
     { caption: 'detailname3', editCellTemplate: '', dataField: "CODEC", width: 200, fixed: true, visible: true, allowEditing: true },

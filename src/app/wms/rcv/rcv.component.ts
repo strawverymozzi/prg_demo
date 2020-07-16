@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { RcvService } from './rcv.service';
 import { RCVFORM, RCVSUBFORM, RCVDETAILFORM } from './_form/rcv-form';
+import notify from 'devextreme/ui/notify';
+import { confirm } from 'devextreme/ui/dialog';
 
 @Component({
   selector: 'app-rcv',
@@ -48,10 +50,17 @@ export class RCVComponent implements OnInit {
     text: 'Save Master',
     icon: 'save',
     onClick: (e) => {
-      this.thisService.saveMaster(this.RCVDETAILFORM).subscribe(res=>{
-        
-      })
-      return false;
+      confirm("Confirm Update?", "UPDATE_MASTER").then((ok) => {
+        if (ok) {
+          this.thisService.saveMaster(this.RCVDETAILFORM).subscribe(res => {
+            notify({ message: res, width: 450 }, res ? "success" : "error", 2000);
+            return true;
+          })
+        } else {
+          return false;
+        }
+      });
+
     }
   };
 
@@ -63,7 +72,6 @@ export class RCVComponent implements OnInit {
     switch (emitee.eventType) {
       case 'RowDblClick':
         const selectedData: any[] = emitee.data[0];
-        console.log(selectedData)
         for (let key of Object.keys(this.RCVDETAILFORM)) {
           this.RCVDETAILFORM[key] = selectedData[key];
         }

@@ -96,7 +96,7 @@ export class RCVSUBFORM extends WmsForm {
 export class RCVDETAILFORM extends WmsForm {
     constructor() {
         super();
-        this.url = '';
+        this.companyName = '';
         this.name = '';
         this.phone1 = '';
         this.phone2 = '';
@@ -104,7 +104,7 @@ export class RCVDETAILFORM extends WmsForm {
         this.address2 = '';
     }
 
-    public url: string = '';
+    public companyName: string = '';
     public name: string = '';
     public phone1: string = '';
     public phone2: string = '';
@@ -114,7 +114,7 @@ export class RCVDETAILFORM extends WmsForm {
     public toRSQL(): string {
         return and(
             ...[
-                this.url ? comparison('url', eq(this.url)) : '',
+                this.companyName ? comparison('url', eq(this.companyName)) : '',
                 this.name ? comparison('name', eq(this.name)) : '',
                 this.phone1 ? comparison('phone1', eq(this.phone1)) : '',
                 this.phone2 ? comparison('phone2', eq(this.phone2)) : '',

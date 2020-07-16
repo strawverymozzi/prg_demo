@@ -34,27 +34,9 @@ export class RcvService extends CommonHttpService {
   //--입고 저장에서 UID값이 있을경우 Update됨.
   //insert+update
   public saveMaster(param?: any): Observable<any> {
-    //   {
-    //     "tenant":"1000",
-    //     "rcvKey":"신규_RCV0001",
-    //     "rcvType":"STD",
-    //     "sts":200,
-    //     "companycd":"INIT_COMP02",
-    //     "rcvSchDate":{
-    //        "year":2020,
-    //        "month":6,
-    //        "day":9
-    //     },
-    //     "receiveDate":{
-    //        "year":2020,
-    //        "month":6,
-    //        "day":11
-    //     },
-    //     "logisticscd":"INIT_COMP01",
-    //     "warehousecd":"WAREHOUSE_10000"
-    //  }
     return this.postJson(REGISTRY.RCVMASTERGRID.POST, param).pipe(
       map(data => {
+        console.log(data)
         return data["list"] || [];
       })
     );

@@ -1,6 +1,6 @@
 export const MASTERGRIDCONFIG = [
-    { caption: 'url', dataField: "url", width: 300, fixed: true, visible: true },
-    { caption: 'uid', dataField: "uid", width: 300, fixed: true, visible: true },
+    { caption: 'uid', dataField: "uid", width: 300, fixed: true, visible: false },
+    { caption: 'companyName', dataField: "companyName", width: 300, fixed: true, visible: true },
     { caption: 'name', dataField: "name", width: 300, fixed: true, visible: true },
     { caption: 'tenant', dataField: "tenant", width: 300, fixed: true, visible: true },
     { caption: 'ownoranotherflg', dataField: "ownoranotherflg", width: 300, fixed: true, visible: true },
