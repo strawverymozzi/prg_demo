@@ -23,7 +23,7 @@ export class MasterGridComponent implements OnInit {
   }
 
   emitEvent(event, type) {
-    if(!event.data){
+    if (!event.data) {
       return;
     }
     const emittee = {
@@ -31,6 +31,9 @@ export class MasterGridComponent implements OnInit {
       data: event.data
     };
     switch (type) {
+      case 'InitNewRow':
+        console.log(event)
+        break;
       case 'RowDblClick':
         this.gridEventEmitter.emit(emittee);
         break;

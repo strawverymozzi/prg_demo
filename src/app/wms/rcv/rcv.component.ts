@@ -53,7 +53,7 @@ export class RCVComponent implements OnInit {
       confirm("Confirm Update?", "UPDATE_MASTER").then((ok) => {
         if (ok) {
           this.thisService.saveMaster(this.RCVDETAILFORM).subscribe(res => {
-            notify({ message: res.msg, width: 500 }, res ? "success" : "error", 2000);
+            notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 2000);
             this.masterSearchBtn.onClick();
             this.actionVisible = false;
           })
@@ -84,7 +84,7 @@ export class RCVComponent implements OnInit {
         break;
       case 'RowInserted':
         this.thisService.saveMaster(selectedData).subscribe(res => {
-          notify({ message: res.msg, width: 500 }, res ? "success" : "error", 3000);
+          notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 3000);
           this.masterSearchBtn.onClick();
         })
         break;
@@ -92,7 +92,7 @@ export class RCVComponent implements OnInit {
         break;
       case 'RowRemoved':
         this.thisService.deleteMaster(selectedData["uid"]).subscribe(res => {
-          notify({ message: res.msg, width: 500 }, res ? "success" : "error", 3000);
+          notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 3000);
           this.masterSearchBtn.onClick();
         })
         break;

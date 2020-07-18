@@ -1,17 +1,18 @@
 <dx-data-grid 
-#masterGrid 
-[dataSource]="dataSource" 
-id="masterGrid"
-height="400px"
-[showBorders]="true" 
-[focusedRowEnabled]="true"
-keyExpr="uid" 
-(onRowDblClick)="emitEvent($event,'RowDblClick')"
-(onRowInserting)="emitEvent($event,'RowInserting')"
-(onRowInserted)="emitEvent($event,'RowInserted')"
-(onRowRemoving)="emitEvent($event,'RowRemoving')"
-(onRowRemoved)="emitEvent($event,'RowRemoved')"
-(onExporting)="onExporting($event)">
+  #masterGrid 
+  [dataSource]="dataSource" 
+  id="masterGrid"
+  height="400px"
+  [showBorders]="true" 
+  [focusedRowEnabled]="true"
+  keyExpr="uid" 
+  (onRowDblClick)="emitEvent($event,'RowDblClick')"
+  (onInitNewRow)="emitEvent($event,'InitNewRow')"
+  (onRowInserting)="emitEvent($event,'RowInserting')"
+  (onRowInserted)="emitEvent($event,'RowInserted')"
+  (onRowRemoving)="emitEvent($event,'RowRemoving')"
+  (onRowRemoved)="emitEvent($event,'RowRemoved')"
+  (onExporting)="onExporting($event)">
 
   <dxo-selection mode="single"></dxo-selection>
   <dxo-editing 
