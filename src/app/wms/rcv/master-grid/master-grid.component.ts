@@ -17,24 +17,34 @@ export class MasterGridComponent implements OnInit {
   @Output() gridEventEmitter = new EventEmitter<any>();
 
   public config: any[] = MASTERGRIDCONFIG;
-
+  public deleteText: string = '삭제';
+  public deleteMessage: string = '정말로 이 행을 삭제하시겠습니까?';
   constructor() {
   }
 
   emitEvent(event, type) {
+    if(!event.data){
+      return;
+    }
     const emittee = {
-      eventObj: event,
       eventType: type,
-      data: null
+      data: event.data
     };
     switch (type) {
       case 'RowDblClick':
-        const selectedData = this.masterGridRef.instance.getSelectedRowsData();
-        emittee.data = selectedData;
+        this.gridEventEmitter.emit(emittee);
+        break;
+      case 'RowInserting':
+        break;
+      case 'RowInserted':
+        this.gridEventEmitter.emit(emittee);
+        break;
+      case 'RowRemoving':
+        break;
+      case 'RowRemoved':
+        this.gridEventEmitter.emit(emittee);
         break;
     }
-
-    this.gridEventEmitter.emit(emittee);
   }
 
   onExporting(e) {

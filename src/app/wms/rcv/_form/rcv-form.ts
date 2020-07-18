@@ -21,16 +21,16 @@ export class RCVFORM extends WmsForm {
         this.SKUNAM = '';
     }
 
-    public RCVSTA: string = '';
-    public RCVTYP: string = '';
-    public FDATE1: string = '';
-    public TODAT1: string = '';
-    public PTNKEY: string = '';
-    public PTNRNM: string = '';
-    public FDATE2: string = '';
-    public TDATE2: string = '';
-    public SKUKEY: string = '';
-    public SKUNAM: string = '';
+    public RCVSTA: string;
+    public RCVTYP: string;
+    public FDATE1: string;
+    public TODAT1: string;
+    public PTNKEY: string;
+    public PTNRNM: string;
+    public FDATE2: string;
+    public TDATE2: string;
+    public SKUKEY: string;
+    public SKUNAM: string;
 
 
     public toRSQL(): string {
@@ -64,16 +64,16 @@ export class RCVSUBFORM extends WmsForm {
         this.INVNUM = '';
         this.USNAME = '';
     }
-    public RCVNUM: string = '';
-    public PCODNM: string = '';
-    public MALLID: string = '';
-    public OORDID: string = '';
-    public RCODNM: string = '';
-    public BOLNUM: string = '';
-    public USERID: string = '';
-    public ERPNUM: string = '';
-    public INVNUM: string = '';
-    public USNAME: string = '';
+    public RCVNUM: string;
+    public PCODNM: string;
+    public MALLID: string;
+    public OORDID: string;
+    public RCODNM: string;
+    public BOLNUM: string;
+    public USERID: string;
+    public ERPNUM: string;
+    public INVNUM: string;
+    public USNAME: string;
 
 
     public toRSQL(): string {
@@ -104,12 +104,12 @@ export class RCVDETAILFORM extends WmsForm {
         this.address2 = '';
     }
 
-    public companyName: string = '';
-    public name: string = '';
-    public phone1: string = '';
-    public phone2: string = '';
-    public address1: string = '';
-    public address2: string = '';
+    public companyName: string;
+    public name: string;
+    public phone1: string;
+    public phone2: string;
+    public address1: string;
+    public address2: string;
 
     public toRSQL(): string {
         return and(

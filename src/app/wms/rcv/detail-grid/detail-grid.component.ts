@@ -69,22 +69,24 @@ export class DetailGridComponent implements OnInit {
 
         break;
       case 'RowInserted':
+        this.gridEventEmitter.emit(emittee);
 
         break;
       case 'RowUpdating':
 
         break;
       case 'RowUpdated':
+        this.gridEventEmitter.emit(emittee);
 
         break;
       case 'RowRemoving':
 
         break;
       case 'RowRemoved':
+        this.gridEventEmitter.emit(emittee);
 
         break;
     };
-    this.gridEventEmitter.emit(emittee);
   }
 
   ngOnInit(): void {

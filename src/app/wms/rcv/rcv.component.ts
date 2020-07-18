@@ -33,10 +33,10 @@ export class RCVComponent implements OnInit {
 
   constructor(private thisService: RcvService) { }
 
-  masterSearch = {
+  masterSearchBtn = {
     text: '검색',
     icon: 'search',
-    onClick: (e) => {
+    onClick: (e?) => {
       const param = this.RCVFORM.toRSQL();
       const paramSub = this.RCVSUBFORM.toRSQL();
       const queryStr = param ? param + ';' + paramSub : paramSub
@@ -46,21 +46,19 @@ export class RCVComponent implements OnInit {
     }
   };
 
-  masterSave = {
+  masterSaveBtn = {
     text: 'Save Master',
     icon: 'save',
     onClick: (e) => {
       confirm("Confirm Update?", "UPDATE_MASTER").then((ok) => {
         if (ok) {
           this.thisService.saveMaster(this.RCVDETAILFORM).subscribe(res => {
-            notify({ message: res, width: 450 }, res ? "success" : "error", 2000);
-            return true;
+            notify({ message: res.msg, width: 500 }, res ? "success" : "error", 2000);
+            this.masterSearchBtn.onClick();
+            this.actionVisible = false;
           })
-        } else {
-          return false;
         }
       });
-
     }
   };
 
@@ -69,9 +67,10 @@ export class RCVComponent implements OnInit {
   }
 
   onMasterGridEvent(emitee) {
+    const selectedData: any[] = emitee.data;
+    console.log(emitee.eventType, emitee.data)
     switch (emitee.eventType) {
       case 'RowDblClick':
-        const selectedData: any[] = emitee.data[0];
         for (let key of Object.keys(this.RCVDETAILFORM)) {
           this.RCVDETAILFORM[key] = selectedData[key];
         }
@@ -80,8 +79,22 @@ export class RCVComponent implements OnInit {
           this.detailGridData = gridData;
           this.actionVisible = true;
         })
-
-        // code block
+        break;
+      case 'RowInserting':
+        break;
+      case 'RowInserted':
+        this.thisService.saveMaster(selectedData).subscribe(res => {
+          notify({ message: res.msg, width: 500 }, res ? "success" : "error", 3000);
+          this.masterSearchBtn.onClick();
+        })
+        break;
+      case 'RowRemoving':
+        break;
+      case 'RowRemoved':
+        this.thisService.deleteMaster(selectedData["uid"]).subscribe(res => {
+          notify({ message: res.msg, width: 500 }, res ? "success" : "error", 3000);
+          this.masterSearchBtn.onClick();
+        })
         break;
     }
   }
@@ -89,25 +102,18 @@ export class RCVComponent implements OnInit {
   onDetailGridEvent(emitee) {
     switch (emitee.eventType) {
       case 'InitNewRow':
-
         break;
       case 'RowInserting':
-
         break;
       case 'RowInserted':
-        // this.thisService.insertRowDetailGrid()
         break;
       case 'RowUpdating':
-
         break;
       case 'RowUpdated':
-
         break;
       case 'RowRemoving':
-
         break;
       case 'RowRemoved':
-
         break;
     }
   }
