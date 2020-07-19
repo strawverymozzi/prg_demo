@@ -16,7 +16,8 @@ height="350px"
 (onRowUpdating)="emitEvent($event,'RowUpdating')"
 (onRowUpdated)="emitEvent($event,'RowUpdated')"
 (onRowRemoving)="emitEvent($event,'RowRemoving')"
-(onRowRemoved)="emitEvent($event,'RowRemoved')">
+(onRowRemoved)="emitEvent($event,'RowRemoved')"
+>
 
   <!-- (onKeyDown)="onDetailDropKeyDown($event)" -->
   <dxo-editing 
@@ -35,21 +36,23 @@ height="350px"
 
   <dxo-keyboard-navigation></dxo-keyboard-navigation>
 
- <dxi-column 
-  *ngFor="let col of config; i as index"
-  [caption]="col.caption"
-  [allowEditing]="col.allowEditing"
-  [editCellTemplate]="col.editCellTemplate" 
-  [dataField]="col.dataField"
-  [width]="col.width"
-  [fixed]="col.fixed"
-  alignment="center">
+  <dxo-column-fixing [enabled]="true"></dxo-column-fixing>
+  
+  <dxi-column 
+    *ngFor="let col of config; i as index"
+    [caption]="col.caption"
+    [allowEditing]="col.allowEditing"
+    [editCellTemplate]="col.editCellTemplate" 
+    [dataField]="col.dataField"
+    [width]="col.width"
+    [fixed]="col.fixed"
+    alignment="center">
   </dxi-column>
 
   <div *dxTemplate="let cellInfo of 'search'">
     <dx-text-box 
-    [value]="cellInfo.value"
-    (onValueChanged)="cellInfo.setValue($event.value)">
+      [value]="cellInfo.value"
+      (onValueChanged)="cellInfo.setValue($event.value)">
       <dxi-button name="skuBtn" [options]="inlineCellBtn">
       </dxi-button>
     </dx-text-box>

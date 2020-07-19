@@ -15,6 +15,7 @@
   (onExporting)="onExporting($event)">
 
   <dxo-selection mode="single"></dxo-selection>
+
   <dxo-editing 
     mode="row"
     [allowDeleting]="true"
@@ -24,7 +25,9 @@
       [confirmDeleteMessage]="deleteMessage">
     </dxo-texts>
   </dxo-editing>
+
   <dxo-export [enabled]="true" [allowExportSelectedData]="true"></dxo-export>
+  
   <dxo-column-fixing [enabled]="true"></dxo-column-fixing>
 
   <ng-container *ngFor="let col of config; i as index">

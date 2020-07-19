@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { RcvService } from './rcv.service';
 import { RCVFORM, RCVSUBFORM, RCVDETAILFORM } from './_form/rcv-form';
 import notify from 'devextreme/ui/notify';
 import { confirm } from 'devextreme/ui/dialog';
+import { DxDataGridComponent } from 'devextreme-angular';
 
 @Component({
   selector: 'app-rcv',
@@ -10,7 +11,6 @@ import { confirm } from 'devextreme/ui/dialog';
   styleUrls: ['./rcv.component.css'],
 })
 export class RCVComponent implements OnInit {
-
   //initF
   public RCVSTA_COMBO: any[];
   public RCVTYP_COMBO: any[];
@@ -22,11 +22,13 @@ export class RCVComponent implements OnInit {
   //grid
   public masterGridData: any[];
   public detailGridData: any[];
+  public detailGridDataTrack: any = [];
   //action
   public actionVisible = false;
   public actionSheetData = [
     {
       text: "Cancel", onClick: (e) => {
+        this.detailGridDataTrack = [];
       }
     },
   ]
@@ -62,17 +64,38 @@ export class RCVComponent implements OnInit {
     }
   };
 
-  onCancelClick(e) {
+  onSaveAll(e) {
     e.cancel = true;
+    this.detailGridDataTrack[0].instance.closeEditCell();
+    const modifiedRows = this.detailGridDataTrack[0].instance.getVisibleRows().filter(row => row.modified || row.isNewRow);
+    const modifiedData = modifiedRows.map(row => row.data);
+    if (!modifiedData.length) {
+      notify({ message: "No Modified data", width: 500, position: 'top' }, "error", 2000);
+      return;
+    }
+    console.log(modifiedData)
+    confirm("전체 저장하시겠습니까?", "SAVE_ALL").then((ok) => {
+      if (ok) {
+        const data = {
+          "rcvMasterDto": this.RCVDETAILFORM,
+          "rcvDetailDtoList": modifiedData
+        }
+        this.thisService.saveAll(data).subscribe(res => {
+          notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 2000);
+          this.masterSearchBtn.onClick();
+          this.actionVisible = false;
+        })
+      }
+    });
   }
 
+  private selectedMasterData: any;
   onMasterGridEvent(emitee) {
-    const selectedData: any[] = emitee.data;
-    console.log(emitee.eventType, emitee.data)
+    this.selectedMasterData = emitee.data;
     switch (emitee.eventType) {
       case 'RowDblClick':
         for (let key of Object.keys(this.RCVDETAILFORM)) {
-          this.RCVDETAILFORM[key] = selectedData[key];
+          this.RCVDETAILFORM[key] = this.selectedMasterData[key];
         }
         const param = this.RCVDETAILFORM.toRSQL();
         this.thisService.getListDetailGrid(param).subscribe(gridData => {
@@ -83,7 +106,7 @@ export class RCVComponent implements OnInit {
       case 'RowInserting':
         break;
       case 'RowInserted':
-        this.thisService.saveMaster(selectedData).subscribe(res => {
+        this.thisService.saveMaster(this.selectedMasterData).subscribe(res => {
           notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 3000);
           this.masterSearchBtn.onClick();
         })
@@ -91,7 +114,7 @@ export class RCVComponent implements OnInit {
       case 'RowRemoving':
         break;
       case 'RowRemoved':
-        this.thisService.deleteMaster(selectedData["uid"]).subscribe(res => {
+        this.thisService.deleteMaster(this.selectedMasterData["uid"]).subscribe(res => {
           notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 3000);
           this.masterSearchBtn.onClick();
         })
@@ -99,21 +122,40 @@ export class RCVComponent implements OnInit {
     }
   }
 
+  setNewUID(old: string, nw: string) {
+    for (let row of this.detailGridData) {
+      if (row["uid"] == old) {
+        row["uid"] = nw;
+      }
+    }
+  }
+
   onDetailGridEvent(emitee) {
+    const selectedData: any[] = emitee.data;
     switch (emitee.eventType) {
       case 'InitNewRow':
         break;
       case 'RowInserting':
         break;
       case 'RowInserted':
+        this.thisService.saveDetail(selectedData).subscribe(res => {
+          notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 3000);
+          this.setNewUID(selectedData["uid"], res['list'][0]["uid"]);
+        })
         break;
       case 'RowUpdating':
         break;
       case 'RowUpdated':
+        this.thisService.saveDetail(selectedData).subscribe(res => {
+          notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 3000);
+        })
         break;
       case 'RowRemoving':
         break;
       case 'RowRemoved':
+        this.thisService.deleteDetail(selectedData["uid"]).subscribe(res => {
+          notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 3000);
+        });
         break;
     }
   }

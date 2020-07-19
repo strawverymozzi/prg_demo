@@ -36,15 +36,16 @@
 
   <!-- action -->
   <dx-action-sheet 
+     *ngIf="actionVisible"
+      [(visible)]="actionVisible"
       id="actionSheet"
       title="actionSheetTitle"
-      cancelText = "Save All"
+      cancelText="Save All"
       height="80%" 
       [showTitle]="true" 
       [showCancelButton]="true"
-      [(visible)]="actionVisible"
       [dataSource]="actionSheetData"
-      (onCancelClick)="onCancelClick($event)"
+      (onCancelClick)="onSaveAll($event)"
       >
     
     <ng-container *dxTemplate="let data of 'content'">
@@ -67,7 +68,10 @@
         <!-- selected master data-->
 
         <!-- detailgrid -->
-        <wms-detail-grid [gridData]="detailGridData" (gridEventEmitter)="onDetailGridEvent($event)"></wms-detail-grid>
+        <wms-detail-grid 
+          [gridDataTrack]="detailGridDataTrack"
+          [gridData]="detailGridData" 
+          (gridEventEmitter)="onDetailGridEvent($event)"></wms-detail-grid>
         <!-- detailgrid -->
       </dx-scroll-view>
     </ng-container>

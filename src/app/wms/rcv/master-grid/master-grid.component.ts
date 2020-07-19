@@ -4,6 +4,7 @@ import { exportDataGrid } from 'devextreme/excel_exporter';
 import * as ExcelJS from 'exceljs';
 import * as FileSaver from "file-saver";
 import { MASTERGRIDCONFIG } from "./grid-config";
+import { eventsHandler } from 'devextreme/events';
 
 @Component({
   selector: 'wms-master-grid',
@@ -32,7 +33,7 @@ export class MasterGridComponent implements OnInit {
     };
     switch (type) {
       case 'InitNewRow':
-        console.log(event)
+        event.data["uid"] = " ";//prevent auto key generation
         break;
       case 'RowDblClick':
         this.gridEventEmitter.emit(emittee);
