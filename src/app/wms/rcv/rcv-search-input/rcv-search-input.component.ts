@@ -17,7 +17,6 @@ export class RcvSearchInputComponent implements OnInit {
   lookUp_PTNKEY = {
     key: 'PTNKEY',
     callback: (res) => {
-      console.log(res)
       if (res) {
         this.dataObject.PTNKEY = res['PTNKEY'];
         this.dataObject.PTNRNM = res['PTNRNM'];

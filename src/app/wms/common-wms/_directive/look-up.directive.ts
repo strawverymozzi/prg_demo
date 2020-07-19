@@ -36,23 +36,3 @@ export class LookUpDirective implements OnInit {
   }
 }
 
-// @HostListener("window:focus", ["$event.target"])
-// onFocus(target) {
-//   console.log('focus', target.value)
-// }
-
-// @HostListener("window:keydown", ["$event.target"])
-// onClick(target) {
-//   console.log('keydown', target.value)
-// }
-
-// @HostListener("blur", ["$event.target"])
-// onBlur(target) {
-//   console.log(target.value)
-
-// }
-// @HostListener("window:input", ["$event.target.value"])
-// onInput(value) {
-//   console.log('input', value)
-
-// }
