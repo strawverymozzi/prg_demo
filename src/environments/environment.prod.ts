@@ -8,8 +8,8 @@
 // prod
 export const environment = {
   production: false,
-  apiUrl: 'http://www.jflab.co.kr:18001/api/v1',
-  // apiUrl: 'https://aqueous-sierra-56466.herokuapp.com/api/v1',
+  // apiUrl: 'http://www.jflab.co.kr:18001/api/v1',
+  apiUrl: 'https://aqueous-sierra-56466.herokuapp.com/api/v1',
   defaultLang: window.navigator.language,
 };
 
