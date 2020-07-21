@@ -49,8 +49,9 @@ height="350px"
     alignment="center">
   </dxi-column>
 
-  <div *dxTemplate="let cellInfo of 'search'">
+  <div *dxTemplate="let cellInfo of 'SH_PTNRKEY'">
     <dx-text-box 
+      [lookUp]="lookUp_PTNKEY"
       [value]="cellInfo.value"
       (onValueChanged)="cellInfo.setValue($event.value)">
       <dxi-button name="skuBtn" [options]="inlineCellBtn">

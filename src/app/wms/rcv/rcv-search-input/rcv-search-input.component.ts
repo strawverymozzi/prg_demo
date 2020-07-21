@@ -17,7 +17,7 @@ export class RcvSearchInputComponent implements OnInit {
   lookUp_PTNKEY = {
     key: 'PTNKEY',
     callback: (res) => {
-      if (res) {
+      if (res && res[0]) {
         this.dataObject.PTNKEY = res['PTNKEY'];
         this.dataObject.PTNRNM = res['PTNRNM'];
       } else {
@@ -34,7 +34,7 @@ export class RcvSearchInputComponent implements OnInit {
   lookUp_SKUKEY = {
     key: 'SKUKEY',
     callback: (res) => {
-      if (res) {
+      if (res && res[0]) {
         this.dataObject.SKUKEY = res['SKUKEY'];
         this.dataObject.SKUNAM = res['SKUNAM'];
       } else {

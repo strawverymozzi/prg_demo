@@ -34,7 +34,7 @@ export class SearchHelperService extends CommonHttpService {
   public getMapWithoutView(helperKey: string, queryStr?: string): Observable<any> {
     return this.getJson(HELPERCONFIG[helperKey].url + (queryStr + '')).pipe(
       map(data => {
-        return data[0] || null;
+        return data || null;
       })
     );
   }

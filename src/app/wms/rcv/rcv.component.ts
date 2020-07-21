@@ -89,13 +89,12 @@ export class RCVComponent implements OnInit {
     });
   }
 
-  private selectedMasterData: any;
   onMasterGridEvent(emitee) {
-    this.selectedMasterData = emitee.data;
+    const selectedMasterData = emitee.data;
     switch (emitee.eventType) {
       case 'RowDblClick':
         for (let key of Object.keys(this.RCVDETAILFORM)) {
-          this.RCVDETAILFORM[key] = this.selectedMasterData[key];
+          this.RCVDETAILFORM[key] = selectedMasterData[key];
         }
         const param = this.RCVDETAILFORM.toRSQL();
         this.thisService.getListDetailGrid(param).subscribe(gridData => {
@@ -106,7 +105,7 @@ export class RCVComponent implements OnInit {
       case 'RowInserting':
         break;
       case 'RowInserted':
-        this.thisService.saveMaster(this.selectedMasterData).subscribe(res => {
+        this.thisService.saveMaster(selectedMasterData).subscribe(res => {
           notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 3000);
           this.masterSearchBtn.onClick();
         })
@@ -114,7 +113,7 @@ export class RCVComponent implements OnInit {
       case 'RowRemoving':
         break;
       case 'RowRemoved':
-        this.thisService.deleteMaster(this.selectedMasterData["uid"]).subscribe(res => {
+        this.thisService.deleteMaster(selectedMasterData["uid"]).subscribe(res => {
           notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 3000);
           this.masterSearchBtn.onClick();
         })

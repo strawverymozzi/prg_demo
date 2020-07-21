@@ -1,7 +1,7 @@
 export const DETAILGRIDCOLCONFIG = [
     { caption: 'uid', dataField: "uid", width: 200, fixed: true, visible: true, allowEditing: false },
     { caption: 'tenant', editCellTemplate: '', dataField: "tenant", width: 200, fixed: false, visible: true, allowEditing: false },
-    { caption: 'detailname2', editCellTemplate: 'search', dataField: "CODEB", width: 200, fixed: false, visible: true, allowEditing: true },
+    { caption: 'detailname2', editCellTemplate: 'SH_PTNRKEY', dataField: "CODEB", width: 200, fixed: false, visible: true, allowEditing: true },
     { caption: 'detailname3', editCellTemplate: '', dataField: "CODEC", width: 200, fixed: false, visible: true, allowEditing: true },
     { caption: 'detailname4', editCellTemplate: '', dataField: "CODED", width: 200, fixed: false, visible: true, allowEditing: true },
     { caption: 'detailname5', editCellTemplate: '', dataField: "CODEE", width: 200, fixed: false, visible: true, allowEditing: true },

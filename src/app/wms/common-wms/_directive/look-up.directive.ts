@@ -19,7 +19,7 @@ export class LookUpDirective implements OnInit {
     const queryStr = and(comparison(searchKey, eq(value)));
     this.shService.getMapWithoutView(searchKey, queryStr).subscribe(
       res => {
-        this.lookUp['callback'](res);
+        this.lookUp['callback'](res,value);
       }
     )
   }

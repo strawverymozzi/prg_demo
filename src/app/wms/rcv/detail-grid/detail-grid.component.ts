@@ -40,6 +40,25 @@ export class DetailGridComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   };
 
+  lookUp_PTNKEY = {
+    key: 'PTNKEY',
+    callback: (res, triedValue) => {
+      if (res && res[0]) {
+        this.detailGridRef.instance.cellValue(this.selectedRowIdx, this.selectedColumn, res["PTNKEY"]);
+        this.detailGridRef.instance.cellValue(this.selectedRowIdx, "CODEC", res["PTNRNM"]);
+        this.onEditDone();
+      } else {
+        const initParam = {
+          'PTNKEY': triedValue,
+        }
+        SearchHelperService.openHelper('PTNKEY', initParam).subscribe(
+          rowData => {
+            this.detailGridRef.instance.cellValue(this.selectedRowIdx, this.selectedColumn, rowData["PTNKEY"]);
+          });
+      }
+    }
+  };
+
   onEditDone() {
     this.seletedRowKey = undefined;
     this.selectedRowIdx = undefined;
@@ -90,7 +109,6 @@ export class DetailGridComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     const edited = this.detailGridRef.instance.hasEditData();
-    // console.log(edited)
   }
 
   ngOnInit(): void {
