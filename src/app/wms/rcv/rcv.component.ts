@@ -4,6 +4,11 @@ import { RCVFORM, RCVSUBFORM, RCVDETAILFORM } from './_form/rcv-form';
 import notify from 'devextreme/ui/notify';
 import { confirm } from 'devextreme/ui/dialog';
 import { DxDataGridComponent } from 'devextreme-angular';
+import { exportDataGrid } from 'devextreme/excel_exporter';
+import * as ExcelJS from 'exceljs';
+import * as FileSaver from 'file-saver';
+import { SearchHelperService } from '../common-wms/search-helper/search-helper.service.';
+import { RcvGridConfig } from './rcv.grid-config';
 
 @Component({
   selector: 'app-rcv',
@@ -11,6 +16,9 @@ import { DxDataGridComponent } from 'devextreme-angular';
   styleUrls: ['./rcv.component.css'],
 })
 export class RCVComponent implements OnInit {
+  @ViewChild('masterGrid', { static: false }) masterGridRef: DxDataGridComponent;
+  @ViewChild('detailGrid', { static: false }) detailGridRef: DxDataGridComponent;
+
   //initF
   public RCVSTA_COMBO: any[];
   public RCVTYP_COMBO: any[];
@@ -20,20 +28,72 @@ export class RCVComponent implements OnInit {
   public RCVSUBFORM: RCVSUBFORM = new RCVSUBFORM();
   public RCVDETAILFORM = new RCVDETAILFORM();
   //grid
+  public gridConfig: RcvGridConfig = new RcvGridConfig();
   public masterGridData: any[];
+  public masterFocusedKey: any;
   public detailGridData: any[];
-  public detailGridDataTrack: any = [];
+  public detailFocusedKey: any;
   //action
   public actionVisible = false;
-  public actionSheetData = [
-    {
-      text: "Cancel", onClick: (e) => {
-        this.detailGridDataTrack = [];
-      }
-    },
-  ]
 
-  constructor(private thisService: RcvService) { }
+  constructor(
+    private thisService: RcvService,
+  ) { }
+
+  onMasterGridEvent(event, type) {
+    const selectedMasterData = event.data;
+    switch (type) {
+      case 'RowDblClick':
+        for (let key of Object.keys(this.RCVDETAILFORM)) {
+          this.RCVDETAILFORM[key] = selectedMasterData[key];
+        }
+        const param = this.RCVDETAILFORM.toRSQL();
+        this.thisService.getListDetailGrid(param).subscribe(gridData => {
+          this.detailGridData = gridData;
+          this.actionVisible = true;
+        })
+        break;
+      case 'RowInserting':
+        break;
+      case 'RowInserted':
+        this.thisService.saveMaster(selectedMasterData).subscribe(res => {
+          notify({ message: res.msg, width: 500, position: 'top' }, res ? 'success' : 'error', 3000);
+          this.masterSearchBtn.onClick();
+        })
+        break;
+    }
+  }
+
+  onDetailGridEvent(event, type) {
+    const selectedData: any[] = event.data;
+    switch (type) {
+      case 'EditingStart':
+        break;
+      case 'InitNewRow':
+        break;
+      case 'InitNewRow':
+        break;
+      case 'RowInserting':
+        break;
+      case 'RowInserted':
+        this.thisService.saveDetail(selectedData).subscribe(res => {
+          notify({ message: res.msg, width: 500, position: 'top' }, res ? 'success' : 'error', 3000);
+          for (let row of this.detailGridData) {
+            if (row['uid'] == selectedData['uid']) {
+              row['uid'] = res['list'][0]['uid'];
+            }
+          }
+        })
+        break;
+      case 'RowUpdating':
+        break;
+      case 'RowUpdated':
+        this.thisService.saveDetail(selectedData).subscribe(res => {
+          notify({ message: res.msg, width: 500, position: 'top' }, res ? 'success' : 'error', 3000);
+        })
+        break;
+    }
+  }
 
   masterSearchBtn = {
     text: '검색',
@@ -52,10 +112,10 @@ export class RCVComponent implements OnInit {
     text: 'Save Master',
     icon: 'save',
     onClick: (e) => {
-      confirm("Confirm Update?", "UPDATE_MASTER").then((ok) => {
+      confirm('Confirm Update?', 'UPDATE_MASTER').then((ok) => {
         if (ok) {
           this.thisService.saveMaster(this.RCVDETAILFORM).subscribe(res => {
-            notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 2000);
+            notify({ message: res.msg, width: 500, position: 'top' }, res ? 'success' : 'error', 2000);
             this.masterSearchBtn.onClick();
             this.actionVisible = false;
           })
@@ -64,99 +124,129 @@ export class RCVComponent implements OnInit {
     }
   };
 
-  onSaveAll(e) {
-    e.cancel = true;
-    this.detailGridDataTrack[0].instance.closeEditCell();
-    const modifiedRows = this.detailGridDataTrack[0].instance.getVisibleRows().filter(row => row.modified || row.isNewRow);
-    const modifiedData = modifiedRows.map(row => row.data);
-    if (!modifiedData.length) {
-      notify({ message: "No Modified data", width: 500, position: 'top' }, "error", 2000);
-      return;
-    }
-    console.log(modifiedData)
-    confirm("전체 저장하시겠습니까?", "SAVE_ALL").then((ok) => {
-      if (ok) {
-        const data = {
-          "rcvMasterDto": this.RCVDETAILFORM,
-          "rcvDetailDtoList": modifiedData
-        }
-        this.thisService.saveAll(data).subscribe(res => {
-          notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 2000);
-          this.masterSearchBtn.onClick();
-          this.actionVisible = false;
-        })
+  masterDeleteBtn = {
+    text: 'Delete',
+    icon: 'trash',
+    type: 'danger',
+    onClick: (e) => {
+      const selected = this.masterGridRef.instance.getSelectedRowsData();
+      if (!selected.length) {
+        notify({ message: 'No Selected data', width: 500, position: 'top' }, 'error', 2000);
+        return;
       }
-    });
-  }
-
-  onMasterGridEvent(emitee) {
-    const selectedMasterData = emitee.data;
-    switch (emitee.eventType) {
-      case 'RowDblClick':
-        for (let key of Object.keys(this.RCVDETAILFORM)) {
-          this.RCVDETAILFORM[key] = selectedMasterData[key];
+      confirm('Confirm Delete Selected Rows?', 'DELETE_MASTER').then((ok) => {
+        if (ok) {
+          this.thisService.deleteMaster(selected, { body: selected }).subscribe(res => {
+            notify({ message: res.msg, width: 500, position: 'top' }, res ? 'success' : 'error', 3000);
+            this.masterSearchBtn.onClick();
+          })
         }
-        const param = this.RCVDETAILFORM.toRSQL();
-        this.thisService.getListDetailGrid(param).subscribe(gridData => {
-          this.detailGridData = gridData;
-          this.actionVisible = true;
-        })
-        break;
-      case 'RowInserting':
-        break;
-      case 'RowInserted':
-        this.thisService.saveMaster(selectedMasterData).subscribe(res => {
-          notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 3000);
-          this.masterSearchBtn.onClick();
-        })
-        break;
-      case 'RowRemoving':
-        break;
-      case 'RowRemoved':
-        this.thisService.deleteMaster(selectedMasterData["uid"]).subscribe(res => {
-          notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 3000);
-          this.masterSearchBtn.onClick();
-        })
-        break;
+      });
     }
-  }
+  };
 
-  setNewUID(old: string, nw: string) {
-    for (let row of this.detailGridData) {
-      if (row["uid"] == old) {
-        row["uid"] = nw;
+  detailDeleteBtn = {
+    text: 'Delete',
+    icon: 'trash',
+    type: 'danger',
+    onClick: (e) => {
+      const selected = this.detailGridRef.instance.getSelectedRowsData();
+      if (!selected.length) {
+        notify({ message: 'No Selected data', width: 500, position: 'top' }, 'error', 2000);
+        return;
       }
+      confirm('Confirm Delete Selected Rows?', 'DELETE_DETAIL').then((ok) => {
+        if (ok) {
+          this.thisService.deleteMaster(selected, { body: selected }).subscribe(res => {
+            notify({ message: res.msg, width: 500, position: 'top' }, res ? 'success' : 'error', 3000);
+            this.masterSearchBtn.onClick();
+          })
+        }
+      });
+    }
+  };
+
+  saveAllBtn = {
+    text: 'Save All',
+    icon: 'save',
+    type: 'default',
+    onClick: (e) => {
+      e.cancel = true;
+      this.detailGridRef.instance.closeEditCell();
+      const modifiedRows = this.detailGridRef.instance.getVisibleRows().filter(row => row['modified'] || row['isNewRow']);
+      const modifiedData = modifiedRows.map(row => row.data);
+      if (!modifiedData.length) {
+        notify({ message: 'No Modified data', width: 500, position: 'top' }, 'error', 2000);
+        return;
+      }
+      confirm('전체 저장하시겠습니까?', 'SAVE_ALL').then((ok) => {
+        if (ok) {
+          const data = {
+            'rcvMasterDto': this.RCVDETAILFORM,
+            'rcvDetailDtoList': modifiedData
+          }
+          this.thisService.saveAll(data).subscribe(res => {
+            notify({ message: res.msg, width: 500, position: 'top' }, res ? 'success' : 'error', 2000);
+            this.masterSearchBtn.onClick();
+            this.actionVisible = false;
+          })
+        }
+      });
     }
   }
 
-  onDetailGridEvent(emitee) {
-    const selectedData: any[] = emitee.data;
-    switch (emitee.eventType) {
-      case 'InitNewRow':
-        break;
-      case 'RowInserting':
-        break;
-      case 'RowInserted':
-        this.thisService.saveDetail(selectedData).subscribe(res => {
-          notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 3000);
-          this.setNewUID(selectedData["uid"], res['list'][0]["uid"]);
-        })
-        break;
-      case 'RowUpdating':
-        break;
-      case 'RowUpdated':
-        this.thisService.saveDetail(selectedData).subscribe(res => {
-          notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 3000);
-        })
-        break;
-      case 'RowRemoving':
-        break;
-      case 'RowRemoved':
-        this.thisService.deleteDetail(selectedData["uid"]).subscribe(res => {
-          notify({ message: res.msg, width: 500, position: 'top' }, res ? "success" : "error", 3000);
+  inlineCellBtn = {
+    icon: 'search',
+    type: 'default',
+    onClick: (e) => {
+      const selectedRowIdx = this.detailGridRef.instance.getRowIndexByKey(this.detailFocusedKey);
+      SearchHelperService.openHelper('PTNKEY', {}).subscribe(
+        rowData => {
+          this.detailGridRef.instance.cellValue(selectedRowIdx, 'CODEB', rowData['PTNKEY']);
+          this.detailGridRef.instance.cellValue(selectedRowIdx, 'CODEC', rowData['PTNRNM']);
         });
-        break;
     }
+  };
+
+  onInlineCellValChange(event, cellInfo) {
+    cellInfo.setValue(event.value)
+  }
+
+  lookUp_PTNKEY = {
+    key: 'PTNKEY',
+    callback: (res, triedValue) => {
+      const selectedRowIdx = this.detailGridRef.instance.getRowIndexByKey(this.detailFocusedKey);
+      if (res && res[0]) {
+        this.detailGridRef.instance.cellValue(selectedRowIdx, 'CODEB', res[0]['PTNKEY']);
+        this.detailGridRef.instance.cellValue(selectedRowIdx, 'CODEC', res[0]['PTNRNM']);
+      } else {
+        const initParam = {
+          'PTNKEY': triedValue,
+        }
+        SearchHelperService.openHelper('PTNKEY', initParam).subscribe(
+          rowData => {
+            this.detailGridRef.instance.cellValue(selectedRowIdx, 'CODEB', rowData['PTNKEY']);
+            this.detailGridRef.instance.cellValue(selectedRowIdx, 'CODEC', rowData['PTNRNM']);
+          });
+      }
+    }
+  };
+
+
+
+  onExporting(e) {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('testSheet');
+    exportDataGrid({
+      component: e.component,
+      worksheet: worksheet,
+      autoFilterEnabled: true
+    }).then(function () {
+      workbook.xlsx.writeBuffer().then(function (buffer) {
+        FileSaver.saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'DataGrid.xlsx');
+      });
+    });
+    e.cancel = true;
   }
 
   ngOnInit(): void {

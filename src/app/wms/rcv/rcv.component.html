@@ -1,5 +1,4 @@
 <div class="wrapper">
-
   <!-- page toolbar -->
   <dx-toolbar>
     <dxi-item location="after" widget="dxButton" locateInMenu="auto" [options]="masterSearchBtn">
@@ -29,7 +28,55 @@
   <dx-tab-panel height="auto" [selectedIndex]="0" [loop]="true" [animationEnabled]="true"
     [swipeEnabled]="true">
     <dxi-item title="테스트 그리드">
-      <wms-master-grid [gridData]="masterGridData" (gridEventEmitter)="onMasterGridEvent($event)"></wms-master-grid>
+      <!-- master grid -->
+      <dx-data-grid 
+        #masterGrid 
+        [dataSource]="masterGridData" 
+        id="masterGrid"
+        height="400px"
+        [showBorders]="true" 
+        [focusedRowEnabled]="true"
+        [(focusedRowKey)]="masterFocusedKey"
+        keyExpr="uid" 
+        (onRowDblClick)="onMasterGridEvent($event,'RowDblClick')"
+        (onInitNewRow)="onMasterGridEvent($event,'InitNewRow')"
+        (onRowInserting)="onMasterGridEvent($event,'RowInserting')"
+        (onRowInserted)="onMasterGridEvent($event,'RowInserted')"
+        (onRowRemoving)="onMasterGridEvent($event,'RowRemoving')"
+        (onRowRemoved)="onMasterGridEvent($event,'RowRemoved')"
+        (onExporting)="onExporting($event)">
+        <dxo-selection
+          selectAllMode="allPages"
+          showCheckBoxesMode="onClick"
+          mode="multiple">
+        </dxo-selection>
+        <dxo-editing 
+          mode="row"
+          [allowAdding]="true">
+        </dxo-editing>
+        <dxo-export [enabled]="true" [allowExportSelectedData]="true"></dxo-export>
+        <dxo-column-fixing [enabled]="true"></dxo-column-fixing>
+        <ng-container *ngFor="let col of gridConfig.MASTER; i as index">
+          <dxi-column 
+            [caption]="col.caption" 
+            [dataField]="col.dataField" 
+            [width]="col.width" 
+            [fixed]="col.fixed"
+            alignment="center">
+          </dxi-column>
+        </ng-container>
+      </dx-data-grid>
+      <!-- master grid -->
+      <!-- master btm toolbar -->
+       <dx-toolbar>
+        <dxi-item 
+         location="after" 
+         widget="dxButton" 
+         locateInMenu="auto" 
+         [options]="masterDeleteBtn">
+        </dxi-item>
+      </dx-toolbar>
+      <!-- master btm toolbar -->
     </dxi-item>
   </dx-tab-panel>
   <!-- tab panel end-->
@@ -40,24 +87,17 @@
       [(visible)]="actionVisible"
       id="actionSheet"
       title="actionSheetTitle"
-      cancelText="Save All"
       height="80%" 
       [showTitle]="true" 
-      [showCancelButton]="true"
-      [dataSource]="actionSheetData"
-      (onCancelClick)="onSaveAll($event)"
-      >
-    
+      [showCancelButton]="true">
     <ng-container *dxTemplate="let data of 'content'">
-      <dx-scroll-view [scrollByContent]="true" [scrollByThumb]="true" height="80%" style="padding-bottom:10px">
-        
+      <dx-scroll-view [scrollByContent]="true" [scrollByThumb]="true" height="95%" style="padding-bottom:10px">
         <!-- save master -->
         <dx-toolbar>
           <dxi-item location="after" widget="dxButton" locateInMenu="auto" [options]="masterSaveBtn">
           </dxi-item>
         </dx-toolbar>
-        <!-- save master -->
-        
+        <!-- save master -->        
         <!-- selected master data -->
         <dx-tab-panel #detailFormTabPanel height="auto" [selectedIndex]="0" [loop]="true" [animationEnabled]="true"
           [swipeEnabled]="true">
@@ -66,13 +106,73 @@
           </dxi-item>
         </dx-tab-panel>
         <!-- selected master data-->
-
         <!-- detailgrid -->
-        <wms-detail-grid 
-          [gridDataTrack]="detailGridDataTrack"
-          [gridData]="detailGridData" 
-          (gridEventEmitter)="onDetailGridEvent($event)"></wms-detail-grid>
+        <dx-data-grid 
+          #detailGrid 
+          id="detailGrid" 
+          keyExpr="uid" 
+          height="450px"
+          [dataSource]="detailGridData" 
+          [showBorders]="true"
+          [focusedRowEnabled]="true" 
+          [(focusedRowKey)]="detailFocusedKey"
+          (onEditingStart)="onDetailGridEvent($event,'EditingStart')"
+          (onInitNewRow)="onDetailGridEvent($event,'InitNewRow')"
+          (onRowInserting)="onDetailGridEvent($event,'RowInserting')"
+          (onRowInserted)="onDetailGridEvent($event,'RowInserted')"
+          (onRowUpdating)="onDetailGridEvent($event,'RowUpdating')"
+          (onRowUpdated)="onDetailGridEvent($event,'RowUpdated')"
+          (onRowRemoving)="onDetailGridEvent($event,'RowRemoving')"
+          (onRowRemoved)="onDetailGridEvent($event,'RowRemoved')">
+          <!-- (onKeyDown)="onDetailDropKeyDown($event)" -->
+          <dxo-editing 
+            mode="batch"
+            [allowUpdating]="true"
+            [allowAdding]="true"></dxo-editing>
+          <!-- <dxo-selection mode="single"></dxo-selection> -->
+          <dxo-selection
+            selectAllMode="allPages"
+            showCheckBoxesMode="onClick"
+            mode="multiple">
+          </dxo-selection>
+          <dxo-keyboard-navigation></dxo-keyboard-navigation>
+          <dxo-column-fixing [enabled]="true"></dxo-column-fixing>          
+          <dxi-column 
+            *ngFor="let col of gridConfig.DETAIL; i as index"
+            [caption]="col.caption"
+            [allowEditing]="col.allowEditing"
+            [editCellTemplate]="col.editCellTemplate" 
+            [dataField]="col.dataField"
+            [width]="col.width"
+            [fixed]="col.fixed"
+            alignment="center"></dxi-column>
+          <div *dxTemplate="let cellInfo of 'SH_PTNRKEY'">
+            <dx-text-box 
+              [lookUp]="lookUp_PTNKEY"
+              [value]="cellInfo.value"
+              (onValueChanged)="onInlineCellValChange($event,cellInfo)">
+              <dxi-button name="inline" [options]="inlineCellBtn">
+              </dxi-button>
+            </dx-text-box>
+          </div>
+        </dx-data-grid>
         <!-- detailgrid -->
+        <!-- detail btm toolbar -->
+        <dx-toolbar>
+          <dxi-item 
+          location="after" 
+          widget="dxButton" 
+          locateInMenu="auto" 
+          [options]="saveAllBtn">
+          </dxi-item>
+          <dxi-item 
+          location="after" 
+          widget="dxButton" 
+          locateInMenu="auto" 
+          [options]="detailDeleteBtn">
+          </dxi-item>
+        </dx-toolbar>
+      <!-- detail btm toolbar -->
       </dx-scroll-view>
     </ng-container>
   </dx-action-sheet>

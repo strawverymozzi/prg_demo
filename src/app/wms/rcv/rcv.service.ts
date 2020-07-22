@@ -58,16 +58,16 @@ export class RcvService extends CommonHttpService {
   }
 
   //delete Output : 0이 정상
-  public deleteMaster(id?: string): Observable<any> {
-    return this.delete(REGISTRY.RCVMASTERGRID.DELETE + id).pipe(
+  public deleteMaster(id: any[], options: any): Observable<any> {
+    return this.delete(REGISTRY.RCVMASTERGRID.DELETE, options).pipe(
       map(data => {
         return data;
       })
     );
   }
 
-  public deleteDetail(id?: string): Observable<any> {
-    return this.delete(REGISTRY.RCVDETAILGRID.DELETE + id).pipe(
+  public deleteDetail(id: any[], options: any): Observable<any> {
+    return this.delete(REGISTRY.RCVDETAILGRID.DELETE, options).pipe(
       map(data => {
         return data;
       })

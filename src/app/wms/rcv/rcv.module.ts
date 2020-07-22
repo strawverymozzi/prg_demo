@@ -1,9 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
 import { RCVComponent } from './rcv.component';
-import { MasterGridComponent } from './master-grid/master-grid.component';
-import { DetailGridComponent } from './detail-grid/detail-grid.component';
 import { RcvRoutingModule } from './rcv-routing.module';
 import { CommonWmsModule } from '../common-wms/common-wms.module';
 import { RcvSearchInputComponent } from './rcv-search-input/rcv-search-input.component';
@@ -18,8 +14,6 @@ const MODULE = [
 ];
 const COMPONENT = [
   RCVComponent,
-  MasterGridComponent,
-  DetailGridComponent,
   RcvSearchInputComponent,
   RcvSearchInputSubComponent,
 ]

@@ -74,9 +74,9 @@ export class CommonHttpService {
     return this._http.post(url, paramObj, this.options);
   }
 
-  protected delete(url: string): Observable<any> {
+  protected delete(url: string, options: any): Observable<any> {
     url = this.baseUrl + url;
-    return this._http.delete(url, this.options);
+    return this._http.delete(url, options);
   }
 
 }
