@@ -11,8 +11,6 @@ const routes: Routes = [
   },
 
   { path: '', redirectTo: 'wms/rcv', pathMatch: 'full' },
-  { path: '**', redirectTo: 'wms' },
-
 ];
 
 @NgModule({

@@ -18,8 +18,8 @@ export class RcvSearchInputComponent implements OnInit {
     key: 'PTNKEY',
     callback: (res) => {
       if (res && res[0]) {
-        this.dataObject.PTNKEY = res['PTNKEY'];
-        this.dataObject.PTNRNM = res['PTNRNM'];
+        this.dataObject.PTNKEY = res[0]['PTNKEY'];
+        this.dataObject.PTNRNM = res[0]['PTNRNM'];
       } else {
         SearchHelperService.openHelper('PTNKEY', this.dataObject).subscribe(
           rowData => {
@@ -35,8 +35,8 @@ export class RcvSearchInputComponent implements OnInit {
     key: 'SKUKEY',
     callback: (res) => {
       if (res && res[0]) {
-        this.dataObject.SKUKEY = res['SKUKEY'];
-        this.dataObject.SKUNAM = res['SKUNAM'];
+        this.dataObject.SKUKEY = res[0]['SKUKEY'];
+        this.dataObject.SKUNAM = res[0]['SKUNAM'];
       } else {
         SearchHelperService.openHelper('SKUKEY', this.dataObject).subscribe(
           rowData => {

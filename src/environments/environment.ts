@@ -35,14 +35,14 @@ export const REGISTRY: any = {
     GET: '/searchHelp/SHSKUGRID?',
   },
   RCVMASTERGRID: {
-    GET: '/rec/receive/listRcv?',
+    GET: '/rec/receive/listRcv?criteria=',
     POST: '/rec/receive/saveRcv',
-    DELETE: '/rec/receive/deleteRcv/',
+    DELETE: '/rec/receive/deleteRcv',
   },
   RCVDETAILGRID: {
-    GET: '/rec/receive/listRcvDetail?',
+    GET: '/rec/receive/listRcvDetail?criteria=',
     POST: '/rec/receive/saveRcvDetail',
-    DELETE: '/rec/receive/deleteRcvDetail/',
+    DELETE: '/rec/receive/deleteRcvDetail',
   },
 }
 

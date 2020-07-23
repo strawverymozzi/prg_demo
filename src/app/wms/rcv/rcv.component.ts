@@ -9,6 +9,7 @@ import * as ExcelJS from 'exceljs';
 import * as FileSaver from 'file-saver';
 import { SearchHelperService } from '../common-wms/search-helper/search-helper.service.';
 import { RcvGridConfig } from './rcv.grid-config';
+import { comparison, eq } from 'rsql-builder';
 
 @Component({
   selector: 'app-rcv',
@@ -47,8 +48,9 @@ export class RCVComponent implements OnInit {
         for (let key of Object.keys(this.RCVDETAILFORM)) {
           this.RCVDETAILFORM[key] = selectedMasterData[key];
         }
-        const param = this.RCVDETAILFORM.toRSQL();
-        this.thisService.getListDetailGrid(param).subscribe(gridData => {
+        const tenant = comparison('tenant', eq(1000));//from token
+        const uid = comparison('rcvId.uid', eq(selectedMasterData["uid"]));
+        this.thisService.getListDetailGrid(`${tenant};${uid}`).subscribe(gridData => {
           this.detailGridData = gridData;
           this.actionVisible = true;
         })
@@ -99,9 +101,10 @@ export class RCVComponent implements OnInit {
     text: '검색',
     icon: 'search',
     onClick: (e?) => {
+      const tenant = comparison('tenant', eq(1000));//from token
       const param = this.RCVFORM.toRSQL();
       const paramSub = this.RCVSUBFORM.toRSQL();
-      const queryStr = param ? param + ';' + paramSub : paramSub
+      const queryStr = `${tenant};${param};${paramSub}`;
       this.thisService.getListMasterGrid(queryStr).subscribe(gridData => {
         this.masterGridData = gridData;
       });
@@ -157,7 +160,7 @@ export class RCVComponent implements OnInit {
       }
       confirm('Confirm Delete Selected Rows?', 'DELETE_DETAIL').then((ok) => {
         if (ok) {
-          this.thisService.deleteMaster(selected, { body: selected }).subscribe(res => {
+          this.thisService.deleteDetail(selected, { body: selected }).subscribe(res => {
             notify({ message: res.msg, width: 500, position: 'top' }, res ? 'success' : 'error', 3000);
             this.masterSearchBtn.onClick();
           })

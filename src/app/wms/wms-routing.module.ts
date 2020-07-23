@@ -9,6 +9,10 @@ const routes: Routes = [
     component: WmsComponent,
     children: [
       {
+        path: '',
+        redirectTo: 'rcv'
+      },
+      {
         path: 'rcv',
         loadChildren: () => import('./rcv/rcv.module')
           .then(m => m.RcvModule)
@@ -21,7 +25,6 @@ const routes: Routes = [
 
     ],
   },
-  // { path: '**', redirectTo: 'rcv01' },
 ];
 
 @NgModule({
