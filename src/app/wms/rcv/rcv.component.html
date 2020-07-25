@@ -59,7 +59,8 @@
         <ng-container *ngFor="let col of gridConfig.MASTER; i as index">
           <dxi-column 
             [caption]="col.caption" 
-            [dataField]="col.dataField" 
+            [dataField]="col.dataField"
+            [visible]="col.visible"
             [width]="col.width" 
             [fixed]="col.fixed"
             alignment="center">
@@ -83,13 +84,15 @@
 
   <!-- action -->
   <dx-action-sheet 
-     *ngIf="actionVisible"
+      #actionSheet
+      *ngIf="actionVisible"
       [(visible)]="actionVisible"
       id="actionSheet"
       title="actionSheetTitle"
       height="80%" 
       [showTitle]="true" 
-      [showCancelButton]="true">
+      [showCancelButton]="true"
+      (onCancelClick)="onActionSheetClose($event)">
     <ng-container *dxTemplate="let data of 'content'">
       <dx-scroll-view [scrollByContent]="true" [scrollByThumb]="true" height="95%" style="padding-bottom:10px">
         <!-- save master -->
@@ -111,11 +114,12 @@
           #detailGrid 
           id="detailGrid" 
           keyExpr="uid" 
-          height="450px"
+          height="400px"
           [dataSource]="detailGridData" 
           [showBorders]="true"
           [focusedRowEnabled]="true" 
           [(focusedRowKey)]="detailFocusedKey"
+          [(focusedRowIndex)]="detailFocusedIndex"          
           (onEditingStart)="onDetailGridEvent($event,'EditingStart')"
           (onInitNewRow)="onDetailGridEvent($event,'InitNewRow')"
           (onRowInserting)="onDetailGridEvent($event,'RowInserting')"
@@ -139,6 +143,7 @@
           <dxo-column-fixing [enabled]="true"></dxo-column-fixing>          
           <dxi-column 
             *ngFor="let col of gridConfig.DETAIL; i as index"
+            [visible]="col.visible"
             [caption]="col.caption"
             [allowEditing]="col.allowEditing"
             [editCellTemplate]="col.editCellTemplate" 
@@ -160,20 +165,41 @@
         <!-- detail btm toolbar -->
         <dx-toolbar>
           <dxi-item 
+          *ngIf="detailChangeBuffer.length"
           location="after" 
           widget="dxButton" 
           locateInMenu="auto" 
-          [options]="saveAllBtn">
+          [options]="saveDetailBtn">
           </dxi-item>
           <dxi-item 
           location="after" 
           widget="dxButton" 
           locateInMenu="auto" 
-          [options]="detailDeleteBtn">
+          [options]="deleteDetailBtn">
+          </dxi-item>
+          <dxi-item 
+          location="after" 
+          widget="dxButton" 
+          locateInMenu="auto" 
+          [options]="saveAllBtn">
           </dxi-item>
         </dx-toolbar>
       <!-- detail btm toolbar -->
       </dx-scroll-view>
     </ng-container>
   </dx-action-sheet>
+
+  <dx-load-panel
+    *ngIf="loadingVisible"
+    #loadPanel
+    shadingColor="rgba(0,0,0,0.4)"
+    [position]="{ of: loadingTarget }"
+    visible="true"
+    [showIndicator]="true"
+    [showPane]="true"
+    [shading]="true"
+    [closeOnOutsideClick]="false"
+    (onShown)="onShownLoader()"
+    (onHidden)="onHiddenLoader()">
+  </dx-load-panel>
 </div>

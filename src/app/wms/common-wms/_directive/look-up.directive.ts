@@ -14,7 +14,7 @@ export class LookUpDirective implements OnInit {
     private shService: SearchHelperService
   ) { }
 
-  doesExsist(value: string) {
+  doLookUp(value: string) {
     const searchKey: string = this.lookUp['key'];
     const queryStr = and(comparison(searchKey, eq(value)));
     this.shService.getMapWithoutView(searchKey, queryStr).subscribe(
@@ -27,7 +27,7 @@ export class LookUpDirective implements OnInit {
   @HostListener("change", ["$event.target.value"])
   onChange(value) {
     if (value) {
-      this.doesExsist(value);
+      this.doLookUp(value);
     }
   }
 

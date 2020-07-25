@@ -19,7 +19,8 @@ import {
   DxSelectBoxModule,
   DxTemplateModule,
   DxTagBoxModule,
-  DxBulletModule
+  DxBulletModule,
+  DxLoadPanelModule
 } from 'devextreme-angular';
 
 const MODULE = [
@@ -42,6 +43,7 @@ const MODULE = [
   DxTagBoxModule,
   DxListModule,
   DxBulletModule,
+  DxLoadPanelModule
 ];
 
 
