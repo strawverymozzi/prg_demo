@@ -119,7 +119,7 @@
           [showBorders]="true"
           [focusedRowEnabled]="true" 
           [(focusedRowKey)]="detailFocusedKey"
-          [(focusedRowIndex)]="detailFocusedIndex"          
+          [(focusedRowIndex)]="detailFocusedIndex"     
           (onEditingStart)="onDetailGridEvent($event,'EditingStart')"
           (onInitNewRow)="onDetailGridEvent($event,'InitNewRow')"
           (onRowInserting)="onDetailGridEvent($event,'RowInserting')"
@@ -129,6 +129,9 @@
           (onRowRemoving)="onDetailGridEvent($event,'RowRemoving')"
           (onRowRemoved)="onDetailGridEvent($event,'RowRemoved')">
           <!-- (onKeyDown)="onDetailDropKeyDown($event)" -->
+          <dxo-group-panel 
+            [visible]="false"> <!-- or "auto" -->
+          </dxo-group-panel>
           <dxo-editing 
             mode="batch"
             [allowUpdating]="true"

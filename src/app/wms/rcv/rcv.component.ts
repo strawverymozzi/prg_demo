@@ -102,7 +102,7 @@ export class RCVComponent implements OnInit {
     this.contextMasterData = event.data;
     switch (type) {
       case 'RowDblClick':
-        if(Object.keys(this.contextMasterData).length){
+        if (Object.keys(this.contextMasterData).length) {
           this.detailSearch();
         }
         break;
@@ -123,6 +123,11 @@ export class RCVComponent implements OnInit {
       case 'EditingStart':
         break;
       case 'InitNewRow':
+        this.loader(true, "#detailGrid");
+        setTimeout(() => {
+          this.detailGridRef.instance.saveEditData();
+          this.loader(false);
+        });
         break;
       case 'RowInserting':
         break;
@@ -266,8 +271,8 @@ export class RCVComponent implements OnInit {
     onClick: (e) => {
       SearchHelperService.openHelper('PTNKEY', {}).subscribe(
         rowData => {
-          this.detailGridRef.instance.cellValue(this.detailFocusedKey, 'ownercd', rowData['PTNKEY']);
-          this.detailGridRef.instance.cellValue(this.detailFocusedKey, 'ownerName', rowData['PTNRNM']);
+          this.detailGridRef.instance.cellValue(this.detailFocusedIndex, 'ownercd', rowData['PTNKEY']);
+          this.detailGridRef.instance.cellValue(this.detailFocusedIndex, 'ownerName', rowData['PTNRNM']);
         });
     }
   };
@@ -280,16 +285,16 @@ export class RCVComponent implements OnInit {
     key: 'PTNKEY',
     callback: (res, triedValue) => {
       if (res && res[0]) {
-        this.detailGridRef.instance.cellValue(this.detailFocusedKey, 'ownercd', res[0]['PTNKEY']);
-        this.detailGridRef.instance.cellValue(this.detailFocusedKey, 'ownerName', res[0]['PTNRNM']);
+        this.detailGridRef.instance.cellValue(this.detailFocusedIndex, 'ownercd', res[0]['PTNKEY']);
+        this.detailGridRef.instance.cellValue(this.detailFocusedIndex, 'ownerName', res[0]['PTNRNM']);
       } else {
         const initParam = {
           'PTNKEY': triedValue,
         }
         SearchHelperService.openHelper('PTNKEY', initParam).subscribe(
           rowData => {
-            this.detailGridRef.instance.cellValue(this.detailFocusedKey, 'ownercd', rowData['PTNKEY']);
-            this.detailGridRef.instance.cellValue(this.detailFocusedKey, 'ownerName', rowData['PTNRNM']);
+            this.detailGridRef.instance.cellValue(this.detailFocusedIndex, 'ownercd', rowData['PTNKEY']);
+            this.detailGridRef.instance.cellValue(this.detailFocusedIndex, 'ownerName', rowData['PTNRNM']);
           });
       }
     }
