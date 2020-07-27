@@ -109,6 +109,8 @@ export class RCVComponent implements OnInit {
       case 'RowInserting':
         break;
       case 'RowInserted':
+        //{"tenant":"1000","expectQty1":100} 필수
+        delete this.contextMasterData.uid;
         this.thisService.saveMaster(this.contextMasterData).subscribe(res => {
           notify({ message: res.msg, width: 500, position: 'top' }, res ? 'success' : 'error', 3000);
           this.masterSearchBtn.onClick();
@@ -153,6 +155,7 @@ export class RCVComponent implements OnInit {
   masterSaveBtn = {
     text: 'Save Master',
     icon: 'save',
+    type: 'success',
     onClick: (e) => {
       confirm('Confirm Update?', 'UPDATE_MASTER').then((ok) => {
         if (ok) {
@@ -215,7 +218,9 @@ export class RCVComponent implements OnInit {
     icon: 'trash',
     type: 'danger',
     onClick: (e) => {
-      const selected = this.detailGridRef.instance.getSelectedRowsData();
+      const selected = this.detailGridRef.instance.getSelectedRowsData().map((row, i, a) => {
+        return row["uid"];
+      });
       if (!selected.length) {
         notify({ message: 'No Selected data', width: 500, position: 'top' }, 'error', 2000);
         return;
@@ -336,12 +341,29 @@ export class RCVComponent implements OnInit {
 
   ngOnInit(): void {
     //combo
-    this.RCVSTA_COMBO = [1, 2, 3];
-    this.RCVTYP_COMBO = [3, 4, 5];
+    this.RCVSTA_COMBO = [];
+    this.RCVTYP_COMBO = [];
     this.MALLID_COMBO = [1, 3, 4];
     //grid
     this.masterGridData = [];
     this.detailGridData = [];
+
+    // this.route.data.subscribe(initData => {
+    //   try {
+    //     const RCVSTATUS = initData[COMMON_CONFIG.PROGRAMINIT]["data"]["RCVSTATUS"];
+    //     const RCVTYPE = initData[COMMON_CONFIG.PROGRAMINIT]["data"]["RCVTYPE"];
+    //     Object.keys(RCVSTATUS).forEach((v, i, a) => {
+    //       this.RCVSTA_COMBO.push({ id: v, name: RCVSTATUS[v] })
+    //     })
+    //     Object.keys(RCVTYPE).forEach((v, i, a) => {
+    //       this.RCVTYP_COMBO.push({ id: v, name: RCVTYPE[v] })
+    //     })
+    //   } catch (error) {
+
+    //   }
+    // })
+
+
   }
 
 }
