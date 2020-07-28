@@ -77,7 +77,6 @@ export class RCVComponent implements OnInit {
     this.thisService.getListDetailGrid(queryStr).subscribe(gridData => {
       if (gridData) {
         this.actionVisible = true;
-        this.detailChangeBuffer = [];
         this.detailGridData = gridData;
       } else {
         notify({ message: "No Item Data", width: 500, position: 'top' }, 'error', 2000);
@@ -101,6 +100,8 @@ export class RCVComponent implements OnInit {
   onMasterGridEvent(event, type) {
     this.contextMasterData = event.data;
     switch (type) {
+      case 'InitNewRow':
+        break;
       case 'RowDblClick':
         if (Object.keys(this.contextMasterData).length) {
           this.detailSearch();
@@ -122,14 +123,57 @@ export class RCVComponent implements OnInit {
   onDetailGridEvent(event, type) {
     const alteredDetailData: any[] = event.data;
     switch (type) {
-      case 'EditingStart':
-        break;
       case 'InitNewRow':
         this.loader(true, "#detailGrid");
         setTimeout(() => {
           this.detailGridRef.instance.saveEditData();
           this.loader(false);
         });
+        break;
+      case 'EditingStart':
+        break;
+      case 'ToolbarPreparing':
+        event.toolbarOptions.items.unshift(
+          {
+            location: 'before',
+            template: 'totalGroupCount'
+          },
+          {
+            location: 'before',
+            widget: 'dxSelectBox',
+            options: {
+              width: 200,
+              items: [{
+                value: 'CustomerStoreState',
+                text: 'Grouping by State'
+              }, {
+                value: 'Employee',
+                text: 'Grouping by Employee'
+              }],
+              displayExpr: 'text',
+              valueExpr: 'value',
+              value: 'CustomerStoreState',
+              // onValueChanged: this.groupChanged.bind(this)
+            }
+          },
+          {
+            location: 'before',
+            widget: 'dxButton',
+            options: {
+              width: 136,
+              text: 'Collapse All',
+              //onClick: this.collapseAllClick.bind(this)
+            }
+          },
+          {
+            location: 'after',
+            widget: 'dxButton',
+            options: {
+              icon: 'refresh',
+              //onClick: this.refreshDataGrid.bind(this)
+            }
+          }
+        );
         break;
       case 'RowInserting':
         break;
@@ -177,7 +221,9 @@ export class RCVComponent implements OnInit {
     icon: 'trash',
     type: 'danger',
     onClick: (e) => {
-      const selected = this.masterGridRef.instance.getSelectedRowsData();
+      const selected = this.masterGridRef.instance.getSelectedRowsData().map((row, i, a) => {
+        return row["uid"];
+      });
       if (!selected.length) {
         notify({ message: 'No Selected data', width: 500, position: 'top' }, 'error', 2000);
         return;
@@ -281,11 +327,7 @@ export class RCVComponent implements OnInit {
         });
     }
   };
-
-  onInlineCellValChange(event, cellInfo) {
-    cellInfo.setValue(event.value)
-  }
-
+  
   lookUp_PTNKEY = {
     key: 'PTNKEY',
     callback: (res, triedValue) => {

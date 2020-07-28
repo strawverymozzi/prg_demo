@@ -38,12 +38,10 @@
         [focusedRowEnabled]="true"
         [(focusedRowKey)]="masterFocusedKey"
         keyExpr="uid" 
-        (onRowDblClick)="onMasterGridEvent($event,'RowDblClick')"
         (onInitNewRow)="onMasterGridEvent($event,'InitNewRow')"
+        (onRowDblClick)="onMasterGridEvent($event,'RowDblClick')"
         (onRowInserting)="onMasterGridEvent($event,'RowInserting')"
         (onRowInserted)="onMasterGridEvent($event,'RowInserted')"
-        (onRowRemoving)="onMasterGridEvent($event,'RowRemoving')"
-        (onRowRemoved)="onMasterGridEvent($event,'RowRemoved')"
         (onExporting)="onExporting($event)">
         <dxo-selection
           selectAllMode="allPages"
@@ -57,7 +55,8 @@
         <dxo-export [enabled]="true" [allowExportSelectedData]="true"></dxo-export>
         <dxo-column-fixing [enabled]="true"></dxo-column-fixing>
         <ng-container *ngFor="let col of gridConfig.MASTER; i as index">
-          <dxi-column 
+          <dxi-column
+            [allowEditing]="col.allowEditing"
             [caption]="col.caption" 
             [dataField]="col.dataField"
             [visible]="col.visible"
@@ -126,12 +125,9 @@
           (onRowInserted)="onDetailGridEvent($event,'RowInserted')"
           (onRowUpdating)="onDetailGridEvent($event,'RowUpdating')"
           (onRowUpdated)="onDetailGridEvent($event,'RowUpdated')"
-          (onRowRemoving)="onDetailGridEvent($event,'RowRemoving')"
-          (onRowRemoved)="onDetailGridEvent($event,'RowRemoved')">
+          (onToolbarPreparing)="onDetailGridEvent($event,'ToolbarPreparing')">
           <!-- (onKeyDown)="onDetailDropKeyDown($event)" -->
-          <dxo-group-panel 
-            [visible]="false"> <!-- or "auto" -->
-          </dxo-group-panel>
+   
           <dxo-editing 
             mode="batch"
             [allowUpdating]="true"
@@ -158,7 +154,7 @@
             <dx-text-box 
               [lookUp]="lookUp_PTNKEY"
               [value]="cellInfo.value"
-              (onValueChanged)="onInlineCellValChange($event,cellInfo)">
+              (onValueChanged)="cellInfo.setValue(cellInfo.value)">
               <dxi-button name="inline" [options]="inlineCellBtn">
               </dxi-button>
             </dx-text-box>
