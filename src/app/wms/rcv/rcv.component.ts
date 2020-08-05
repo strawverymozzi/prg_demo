@@ -10,6 +10,8 @@ import * as FileSaver from 'file-saver';
 import { SearchHelperService } from '../common-wms/search-helper/search-helper.service.';
 import { RcvGridConfig } from './rcv.grid-config';
 import { comparison, eq } from 'rsql-builder';
+import { RoleChecker } from 'src/app/common/role-checker';
+import { ActivatedRoute } from '@angular/router';
 
 function joinRSQLString(...param): string {
   return [...param].filter((sqlString) => {
@@ -26,8 +28,6 @@ export class RCVComponent implements OnInit {
   @ViewChild('masterGrid', { static: false }) masterGridRef: DxDataGridComponent;
   @ViewChild('detailGrid', { static: false }) detailGridRef: DxDataGridComponent;
 
-  public loadingTarget: string;//#masterGrid  #detailGrid
-  public loadingVisible: boolean;
   //initF
   public RCVSTA_COMBO: any[];
   public RCVTYP_COMBO: any[];
@@ -40,20 +40,93 @@ export class RCVComponent implements OnInit {
   public gridConfig: RcvGridConfig = new RcvGridConfig();
   public masterGridData: any[];
   public masterFocusedKey: any;
-  private contextMasterData: any;
+  public contextMasterData: any;
   public detailGridData: any[];
-  public detailFocusedKey: any;
   public detailFocusedIndex: any;
-  public detailChangeBuffer: any[] = [];
+  public detailGridFunction: any[] = [];
+  public detailNewRowKey = 'NEW';
+  public detailNewRowIncrementor = 1;
+
   //action
   public actionVisible;
+  public loader: any = {
+    enabled: true,
+    shading: true,
+    shadingColor: 'rgba(0,0,0,0.4)',
+    showPane: true,
+  };
 
   constructor(
+    private route: ActivatedRoute,
     private thisService: RcvService,
-  ) { }
+    public roleChecker: RoleChecker,
+  ) {
+    if (this.roleChecker.isGranted(['delFlg'])) this.detailGridFunction.push(this.deleteDetailBtn);
+    if (this.roleChecker.isGranted(['infFlg'])) this.detailGridFunction.push(this.detailInsertBtn);
+    if (this.roleChecker.isGranted(['infFlg']) || this.roleChecker.isGranted(['updFlg'])) this.detailGridFunction.push(this.detailSaveBtn);
+  }
+
+  onActionSheetClose(e) {
+    if (this.checkModified('detail')) {
+      e.cancel = true;
+      confirm('변경사항이 있습니다. 취소하시겠습니까?', 'UNSAVED_CHANGES').then((ok) => {
+        if (ok) {
+          this.actionVisible = false;
+        }
+      })
+    }
+    this.detailNewRowIncrementor = 1;
+  }
+
+  checkModified(id): boolean {
+    let modified = false;
+    let allRows;
+    switch (id) {
+      case 'master':
+        break;
+      case 'detail':
+        allRows = this.detailGridRef.instance.getVisibleRows();
+        allRows.some((row, i, a) => {
+          return (row['isNewRow'] || row['modified']);
+        })
+        break;
+    }
+    return modified;
+  }
+
+  getNewRows(id): any[] {
+    const subjectRows = [];
+    let allRows;
+    switch (id) {
+      case 'master':
+        break;
+      case 'detail':
+        allRows = this.detailGridRef.instance.getVisibleRows();
+        allRows.forEach((row, i, a) => {
+          if (row.data['uid'].indexOf(this.detailNewRowKey) != -1) subjectRows.push(row.data);
+        })
+        break;
+    }
+    return subjectRows;
+  }
+
+  getUpdatedRows(id): any[] {
+    const subjectRows = [];
+    let allRows;
+    switch (id) {
+      case 'master':
+        break;
+      case 'detail':
+        allRows = this.detailGridRef.instance.getVisibleRows();
+        allRows.forEach((row, i, a) => {
+          if (row.data['uid'].indexOf(this.detailNewRowKey) == -1 && row['modified']) subjectRows.push(row.data);
+        })
+        break;
+    }
+    return subjectRows;
+  }
 
   masterSearch() {
-    this.loader(true, "#masterGrid")
     const tenant = comparison('tenant', eq(1000));//from token
     const param = this.RCVFORM.toRSQL();
     const paramSub = this.RCVSUBFORM.toRSQL();
@@ -62,12 +135,10 @@ export class RCVComponent implements OnInit {
       if (gridData) {
         this.masterGridData = gridData;
       }
-      this.loader(false);
     });
   }
 
   detailSearch() {
-    this.loader(true, null)
     for (let key of Object.keys(this.RCVDETAILFORM)) {
       this.RCVDETAILFORM[key] = this.contextMasterData[key];
     }
@@ -81,20 +152,7 @@ export class RCVComponent implements OnInit {
       } else {
         notify({ message: "No Item Data", width: 500, position: 'top' }, 'error', 2000);
       }
-      this.loader(false);
     })
-  }
-
-  onActionSheetClose(e) {
-    if (!this.detailGridRef.instance.hasEditData() && this.detailChangeBuffer.length) {
-      e.cancel = true;
-      confirm('변경사항이 있습니다. 취소하시겠습니까?', 'UNSAVED_CHANGES').then((ok) => {
-        if (ok) {
-          this.detailChangeBuffer = [];
-          this.actionVisible = false;
-        }
-      })
-    }
   }
 
   onMasterGridEvent(event, type) {
@@ -108,82 +166,33 @@ export class RCVComponent implements OnInit {
         }
         break;
       case 'RowInserting':
+        event.cancel = true;
+        confirm('Confirm Save?', 'SAVE_MASTER').then((ok) => {
+          if (ok) {
+            this.thisService.saveMaster(this.contextMasterData).subscribe(res => {
+              notify({ message: res.msg, width: 500, position: 'top' }, res ? 'success' : 'error', 3000);
+              this.masterSearch();
+            });
+          }
+        });
         break;
       case 'RowInserted':
-        //{"tenant":"1000","expectQty1":100} 필수
-        delete this.contextMasterData.uid;
-        this.thisService.saveMaster(this.contextMasterData).subscribe(res => {
-          notify({ message: res.msg, width: 500, position: 'top' }, res ? 'success' : 'error', 3000);
-          this.masterSearchBtn.onClick();
-        })
         break;
     }
   }
 
   onDetailGridEvent(event, type) {
-    const alteredDetailData: any[] = event.data;
     switch (type) {
       case 'InitNewRow':
-        this.loader(true, "#detailGrid");
-        setTimeout(() => {
-          this.detailGridRef.instance.saveEditData();
-          this.loader(false);
-        });
         break;
-      case 'EditingStart':
+      case 'ContentReady':
         break;
       case 'ToolbarPreparing':
-        event.toolbarOptions.items.unshift(
-          {
-            location: 'before',
-            template: 'totalGroupCount'
-          },
-          {
-            location: 'before',
-            widget: 'dxSelectBox',
-            options: {
-              width: 200,
-              items: [{
-                value: 'CustomerStoreState',
-                text: 'Grouping by State'
-              }, {
-                value: 'Employee',
-                text: 'Grouping by Employee'
-              }],
-              displayExpr: 'text',
-              valueExpr: 'value',
-              value: 'CustomerStoreState',
-              // onValueChanged: this.groupChanged.bind(this)
-            }
-          },
-          {
-            location: 'before',
-            widget: 'dxButton',
-            options: {
-              width: 136,
-              text: 'Collapse All',
-              //onClick: this.collapseAllClick.bind(this)
-            }
-          },
-          {
-            location: 'after',
-            widget: 'dxButton',
-            options: {
-              icon: 'refresh',
-              //onClick: this.refreshDataGrid.bind(this)
-            }
-          }
-        );
-        break;
-      case 'RowInserting':
-        break;
-      case 'RowInserted':
-        this.detailChangeBuffer.push(alteredDetailData);
+        event.toolbarOptions.items = this.detailGridFunction;
         break;
       case 'RowUpdating':
         break;
       case 'RowUpdated':
-        this.detailChangeBuffer.push(alteredDetailData);
         break;
     }
   }
@@ -193,26 +202,6 @@ export class RCVComponent implements OnInit {
     icon: 'search',
     onClick: (e?) => {
       this.masterSearch();
-    }
-  };
-
-  masterSaveBtn = {
-    text: 'Save Master',
-    icon: 'save',
-    type: 'success',
-    onClick: (e) => {
-      confirm('Confirm Update?', 'UPDATE_MASTER').then((ok) => {
-        if (ok) {
-          for (let key of Object.keys(this.RCVDETAILFORM)) {
-            this.contextMasterData[key] = this.RCVDETAILFORM[key];
-          }
-          this.thisService.saveMaster(this.contextMasterData).subscribe(res => {
-            notify({ message: res.msg, width: 500, position: 'top' }, res ? 'success' : 'error', 2000);
-            this.masterSearchBtn.onClick();
-            this.actionVisible = false;
-          })
-        }
-      });
     }
   };
 
@@ -239,48 +228,112 @@ export class RCVComponent implements OnInit {
     }
   };
 
-  saveDetailBtn = {
-    text: 'Save Item',
+  masterUpdBtn = {
+    text: 'Update Master',
     icon: 'save',
     type: 'success',
+    stylingMode: 'outlined',
     onClick: (e) => {
-      if (!this.detailChangeBuffer.length) {
-        notify({ message: 'No Changed data.', width: 500, position: 'top' }, 'error', 2000);
-        return;
-      }
-      confirm('Confirm Save changes?', 'SAVE_DETAIL').then((ok) => {
+      confirm('Confirm Update?', 'UPDATE_MASTER').then((ok) => {
         if (ok) {
-          this.thisService.saveDetail(this.detailChangeBuffer).subscribe(res => {
-            notify({ message: "Changes Saved.", width: 500, position: 'top' }, res ? 'success' : 'error', 3000);
-            this.detailSearch();
+          for (let key of Object.keys(this.RCVDETAILFORM)) {
+            this.contextMasterData[key] = this.RCVDETAILFORM[key];
+          }
+          this.thisService.saveMaster(this.contextMasterData).subscribe(res => {
+            notify({ message: res.msg, width: 500, position: 'top' }, res ? 'success' : 'error', 2000);
+            this.masterSearchBtn.onClick();
+            this.actionVisible = false;
           })
         }
       });
     }
   };
 
-  deleteDetailBtn = {
-    text: 'Delete Item',
-    icon: 'trash',
-    type: 'danger',
-    onClick: (e) => {
-      const selected = this.detailGridRef.instance.getSelectedRowsData().map((row, i, a) => {
-        return row["uid"];
-      });
-      if (!selected.length) {
-        notify({ message: 'No Selected data', width: 500, position: 'top' }, 'error', 2000);
-        return;
+
+  detailInsertBtn = {
+    location: 'after',
+    widget: 'dxButton',
+    options: {
+      icon: 'add',
+      onClick: () => {
+        this.detailGridData.unshift({ "uid": `${this.detailNewRowKey}${this.detailNewRowIncrementor++}` });
+        //callback
+        // });
       }
-      confirm('Confirm Delete Selected Rows?', 'DELETE_DETAIL').then((ok) => {
-        if (ok) {
-          this.thisService.deleteDetail({ body: selected }).subscribe(res => {
-            notify({ message: res.msg, width: 500, position: 'top' }, res ? 'success' : 'error', 3000);
-            this.detailSearch();
-          })
-        }
-      });
     }
-  };
+  }
+
+  deleteDetailBtn = {
+    location: 'after',
+    widget: 'dxButton',
+    options: {
+      // text: 'Add Row',
+      icon: 'minus',
+      onClick: () => {
+        const selected = this.detailGridRef.instance.getSelectedRowsData();
+        if (!selected.length) {
+          notify({ message: 'No Selected data', width: 500, position: 'top' }, 'error', 2000);
+          return;
+        }
+        confirm('Confirm Delete Selected Rows?', 'DELETE_DETAIL').then((ok) => {
+          if (ok) {
+            const filtered = selected
+              .filter((row, i, a) => {
+                if (row['uid'].indexOf(this.detailNewRowKey) != -1) {
+                  const idx = this.detailGridRef.instance.getRowIndexByKey(row['uid']);
+                  this.detailGridRef.instance.deleteRow(idx);
+                  return false;
+                } else {
+                  return true;
+                }
+              })
+              .map((row, i, a) => {
+                return row['uid'];
+              });
+
+            if (filtered.length) {
+              this.thisService.deleteDetail({ body: filtered }).subscribe(res => {
+                notify({ message: 'Delete Success', width: 500, position: 'top' }, res ? 'success' : 'error', 3000);
+              })
+              this.detailGridRef.instance.cancelEditData();
+              this.detailSearch();
+            }
+          }
+          this.detailGridRef.instance.saveEditData();
+        });
+
+      }
+    }
+  }
+
+  detailSaveBtn = {
+    location: 'after',
+    widget: 'dxButton',
+    options: {
+      text: 'Save Detail',
+      icon: 'save',
+      type: 'success',
+      onClick: () => {
+        this.detailGridRef.instance.closeEditCell();
+        const newRows = this.roleChecker.isGranted(['infFlg']) ? this.getNewRows('detail') : [];
+        const updatedRows = this.roleChecker.isGranted(['updFlg']) ? this.getUpdatedRows('detail') : []
+        const subjectToSaveRows = [...newRows, ...updatedRows];
+        if (!subjectToSaveRows.length) {
+          notify({ message: 'No Changed data.', width: 500, position: 'top' }, 'error', 2000);
+          return;
+        }
+        confirm('Confirm Save changes?', 'SAVE_DETAIL').then((ok) => {
+          if (ok) {
+            this.thisService.saveDetail(subjectToSaveRows).subscribe(res => {
+              notify({ message: "Changes Saved.", width: 500, position: 'top' }, res ? 'success' : 'error', 3000);
+            })
+            this.detailGridRef.instance.cancelEditData();
+            this.detailSearch();
+          }
+        });
+      }
+    }
+  }
 
   saveAllBtn = {
     text: 'Save All',
@@ -289,8 +342,10 @@ export class RCVComponent implements OnInit {
     onClick: (e) => {
       e.cancel = true;
       this.detailGridRef.instance.closeEditCell();
-      const modifiedRows = this.detailGridRef.instance.getVisibleRows().filter(row => row['modified'] || row['isNewRow']);
-      const modifiedData = modifiedRows.map(row => row.data);
+      const newRows = this.roleChecker.isGranted(['infFlg']) ? this.getNewRows('detail') : [];
+      const updatedRows = this.roleChecker.isGranted(['updFlg']) ? this.getUpdatedRows('detail') : []
+      const modifiedRows = [...newRows, ...updatedRows];
+
       // if (!modifiedData.length) {
       //   notify({ message: 'No Modified data', width: 500, position: 'top' }, 'error', 2000);
       //   return;
@@ -302,7 +357,7 @@ export class RCVComponent implements OnInit {
           }
           const data = {
             'rcvMasterDto': this.contextMasterData,
-            'rcvDetailDtoList': modifiedData
+            'rcvDetailDtoList': modifiedRows
           }
           this.thisService.saveAll(data).subscribe(res => {
             if (res && res.length && res[0]["success"]) {
@@ -327,7 +382,8 @@ export class RCVComponent implements OnInit {
         });
     }
   };
-  
+
+
   lookUp_PTNKEY = {
     key: 'PTNKEY',
     callback: (res, triedValue) => {
@@ -347,6 +403,10 @@ export class RCVComponent implements OnInit {
     }
   };
 
+  onDetailCellValueChanged(e, cellInfo) {
+    cellInfo.setValue(e.value)
+  }
+
   onExporting(e) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('testSheet');
@@ -360,25 +420,6 @@ export class RCVComponent implements OnInit {
       });
     });
     e.cancel = true;
-  }
-
-  loader(on: boolean, target?: string) {
-    this.loadingTarget = target;
-    if (on) {
-      this.loadingVisible = true;
-    } else {
-      setTimeout(
-        () => {
-          this.loadingVisible = false
-        },
-        300);
-    }
-  }
-
-  onShownLoader() {
-  }
-
-  onHiddenLoader() {
   }
 
   ngOnInit(): void {

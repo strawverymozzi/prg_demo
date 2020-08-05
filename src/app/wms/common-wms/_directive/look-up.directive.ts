@@ -19,9 +19,10 @@ export class LookUpDirective implements OnInit {
     const queryStr = and(comparison(searchKey, eq(value)));
     this.shService.getMapWithoutView(searchKey, queryStr).subscribe(
       res => {
-        this.lookUp['callback'](res,value);
+        this.lookUp['callback'](res, value);
       }
-    )
+    );
+
   }
 
   @HostListener("change", ["$event.target.value"])
@@ -31,6 +32,12 @@ export class LookUpDirective implements OnInit {
     }
   }
 
+  // @HostListener("keydown", ["$event"])
+  // onChange(event) {
+  //   if (event.keyCode == 13 && event.target.value) {
+  //     this.doLookUp(event.target.value);
+  //   }
+  // }
 
   ngOnInit() {
   }
